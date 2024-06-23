@@ -6,15 +6,11 @@ import (
 
 
 func main() {
-	var tempInt int = 10
-	var tempFloat float64 = float64(tempInt)
-	fmt.Printf("Integer to float: %.2f \n", tempFloat)
+	fmt.Println("What's your name?")
+	var name string
+	fmt.Scanln(&name) //The &name syntax passes a pointer to the name variable, allowing fmt.Scanln to modify the variable's value directly.
 
-	fmt.Printf("Type of tempInt is %T \n", tempInt) // Check type of a variable we use the %T
-	fmt.Printf("Type of tempFloat is %T \n", tempFloat)
-
-	str := fmt.Sprint(123) // Convert Integer to string. Note: We dont use string(123) to convert to string, if we do this we get a rune type instead
-	fmt.Printf("Type of variable str is %T \n", str)
+	fmt.Printf("Hello,%s 👻 \n", name)
 }
 
 
