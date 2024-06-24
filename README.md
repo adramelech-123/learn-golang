@@ -300,3 +300,100 @@ func main() {
 	fmt.Printf("Hello,%s 👻 \n", name)
 }
 ```
+
+## 3. Pointers
+
+Pointers in Golang allow us to work with memory addresses directly, giving us the ability to manipulate the actual data stored in those addresses rather than creating copies of the data. This is especially useful when we need to modify the value of a variable inside a function and have that change reflected outside the function.
+
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func sayHello(greeting string) {
+	greeting = "Hello, World"
+}
+
+func sayHelloPointer(greeting *string) {
+	*greeting = "Hello, World!"
+}
+
+func main() {
+	// Pointers - These hold the memory address of a variable
+	var greeting string = "Hello, GO"
+
+	sayHello(greeting) // Function gets a copy of greeting, the copy is updated to "Hello, World"
+	fmt.Println("After calling sayHello:", greeting) // However, the original greeting still remains the same
+
+	sayHelloPointer(&greeting) // The function gets greeting's memory location and updates greeting to "Hello, World!"
+	fmt.Println("After calling sayHelloPointer:", greeting) // greeting is now "Hello, World!" because we changed the original greeting not a copy
+
+	// Pointers help us identify variables by their original location and we can manipulate the data in the original variable rather than creating an entirely different copy of the variable
+}
+```
+
+### Explanation:
+
+1. **Declaring and Assigning Variables:**
+   ```go
+   var greeting string = "Hello, GO"
+   ```
+   Here, we declare a variable `greeting` of type `string` and assign it the value "Hello, GO".
+
+2. **Function without Pointers:**
+   ```go
+   func sayHello(greeting string) {
+       greeting = "Hello, World"
+   }
+   ```
+   In this function, `greeting` is passed by value, meaning a copy of `greeting` is created within the function scope. Changes made to `greeting` inside `sayHello` do not affect the original variable.
+
+3. **Calling Function without Pointers:**
+   ```go
+   sayHello(greeting)
+   fmt.Println("After calling sayHello:", greeting)
+   ```
+   When `sayHello` is called, it modifies the copy of `greeting` to "Hello, World". However, the original `greeting` remains unchanged, so the output is still "Hello, GO".
+
+4. **Function with Pointers:**
+   ```go
+   func sayHelloPointer(greeting *string) {
+       *greeting = "Hello, World!"
+   }
+   ```
+   This function takes a pointer to a string (`*string`). The asterisk (`*`) is used to denote that `greeting` is a pointer. Inside the function, `*greeting` dereferences the pointer, allowing us to update the value at the memory address to which the pointer points.
+
+5. **Calling Function with Pointers:**
+   ```go
+   sayHelloPointer(&greeting)
+   fmt.Println("After calling sayHelloPointer:", greeting)
+   ```
+   The `&` operator is used to get the memory address of `greeting` and pass it to `sayHelloPointer`. Inside the function, the value at the address is updated to "Hello, World!". This change is reflected outside the function as well, so the output becomes "Hello, World!".
+
+### Zero Values of Variables and Pointers:
+
+- **Zero Value of Variables:**
+  - For basic types like `int`, `float64`, `bool`, and `string`, the zero values are `0`, `0.0`, `false`, and `""` (empty string), respectively.
+  - Example:
+    ```go
+    var num int       // Zero value is 0
+    var name string   // Zero value is ""
+    ```
+
+- **Zero Value of Pointers:**
+  - The zero value of a pointer is `nil`, which means it doesn't point to any memory address.
+  - Example:
+    ```go
+    var ptr *int      // Zero value is nil
+    if ptr == nil {
+        fmt.Println("Pointer is nil")
+    }
+    ```
+
+In summary, pointers in Golang are used to store memory addresses of variables. This allows functions to modify the actual data rather than working with copies. Understanding the zero values of variables and pointers helps in recognizing uninitialized states and preventing potential runtime errors like dereferencing `nil` pointers.
+
+## 4. Control Structures
+
