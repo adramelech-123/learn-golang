@@ -397,3 +397,286 @@ In summary, pointers in Golang are used to store memory addresses of variables. 
 
 ## 4. Control Structures
 
+This is a basic Rock, Paper, Scissors game using control structures in Golang:
+
+```go
+package main
+
+import (
+	"fmt"
+	"math/rand"
+)
+
+func main() {
+	const rounds = 3
+	
+	fmt.Println("Let's play Rock, Paper, Scissors! You have", rounds, "rounds")
+
+	// Game Rounds
+	for i := 0; i < rounds; i++ {
+		// Generate Computer's choice
+		computerChoiceNum := rand.Intn(rounds)
+		var computerChoice string 
+
+		switch computerChoiceNum {
+			case 0: computerChoice = "Rock"
+			case 1: computerChoice = "Paper"
+			case 2: computerChoice = "Scissors"
+		}
+
+		//  Read Player's Choice
+		var playerChoice string
+		fmt.Println("Enter your choice (Rock 🌑,Paper 🧻,Scissors ✂️ )")
+		fmt.Scanln(&playerChoice)
+		
+		fmt.Println("Computer chose", computerChoice)
+		switch {
+			case playerChoice == computerChoice:
+				fmt.Println("It's a tie!")
+			case playerChoice == "Rock"	 && computerChoice == "Scissors",
+				playerChoice == "Paper"	 && computerChoice == "Rock",
+				playerChoice == "Scissors"	 && computerChoice == "Paper" :
+				fmt.Println("You win this round!")	
+			default:
+				fmt.Println("Computer wins this round!")	
+		}
+	} 
+} 
+
+```
+
+## 5. Data Structures (Arrays, Slices, Maps)
+
+### Arrays
+
+Arrays are declared in the following form:
+
+```go
+var variableName [arrayLength]varType
+```
+
+There are two ways to declare arrays arrays:
+
+```go
+func main() {
+	// 1. Assign values by index
+	var bodyTypes [3]string
+	bodyTypes[0] = "Sedan"
+	bodyTypes[1] = "SUV"
+	bodyTypes[2] = "Convertible"
+
+	fmt.Println(bodyTypes)
+
+	// 2. Declare array and initialize
+	colorSchemes := [3]string{"Army Green", "Matte Black", "Velvet"}
+	fmt.Println(colorSchemes)
+} 
+```
+
+### 2D Arrays
+
+2D Arrays are essentially arrays of arrays. Each element in the 2D array can be accessed by two indices (row & column).
+
+```go
+
+func main() {
+	// var variableName [rows][cols]varType
+	var carFleet [3][2]string
+
+	// We declare each of the 3 rows by index taking note that each row has two elements
+	carFleet[0] = [2]string{"Sedan", "Matte Black"}
+	carFleet[1] = [2]string{"SUV", "Velvet"}
+	carFleet[2] = [2]string{"Convertieble", "Army Green"}
+
+	
+	// Print out each row
+	for i := 0; i < len(carFleet); i++ {
+		row := carFleet[i]
+		
+		for j := 0; j < len(row); j++ {
+			fmt.Printf("%v", row[j])
+		}
+		fmt.Println()	
+	}
+} 
+```
+
+### Slices
+
+Slices are a more flexible an powerful alternative to arrays. Empty Slices are initialized to `nil` and have a length of `0`.
+
+```go
+	fuelTypes := []string{"Electricity", "Gasoline", "Hybrid"}
+	// fmt.Println("Length is:",len(fuelTypes))
+	fmt.Println("Original Slice:",fuelTypes)
+
+	// Add new element to a slice
+	fuelTypes = append(fuelTypes, "Diesel", "Hydrogen")
+	fmt.Println("Appended slice:", fuelTypes) //Note: This is a completely new slice
+```
+
+We can use the `make()` function to build objects of type slice, map, or chan (only) with a pre-defined length.
+
+```go
+fuelTypes := make([]string, 3)
+	fmt.Println("Length is: ",len(fuelTypes))
+
+	// Even though the slice is of size 3, we can assign any number of elements so long they dont exceed 3
+	fuelTypes[0] = "Electric"
+	fuelTypes[1] = "Hybrid"
+
+	fuelTypes = append(fuelTypes, "Diesel", "Hydrogen", "Gasoline") // Since we did not initialize the 3rd element. It will remain empty, then the new elements we append will be added after the empty string on position 2
+
+	fuelTypesCopy := make([]string, len(fuelTypes)) 
+	copy(fuelTypesCopy, fuelTypes) // The copy() function creates a copy of a certain piece of data
+	fmt.Println(fuelTypesCopy)
+
+```
+
+### Maps
+
+Maps in golang are used for storing a collection of key-value pairs. They are the equivalent of dictionaries in python or objects in javascript.
+
+A map consists of a key and a value and is declared as `map[keyType]valueType` for example:
+
+```go
+// We are creating a map of animals and their respective numbers at a zoo
+animal := make(map[string]int)
+
+animal["Dog"] = 23
+animal["Cat"] = 5
+animal["Tiger"] = 6
+
+// Maps can also be declared in one line as follows
+
+animals := map[string]int{
+	"Lions":     25,
+	"Ostriches": 15,
+	"Dolphins" : 10,
+}
+
+```
+Maps can be accessed with their keys:
+
+```go
+numberOfLions := animals["Lions"]
+fmt.Printf("The Zoo has %v Lions\n", numberOfLions)
+
+// Since Crocodiles dont exist in the map, the value for animals["Crocodiles"] will be 0
+fmt.Printf("The Zoo has %v Crocodiles\n", animals["Crocodiles"])
+
+```
+
+We can delete items from a mapby using the `delete()` function:
+
+```go
+delete(animals, "Ostriches")
+fmt.Println("Animals: ", animals)
+```
+
+Checking the existence of a certain key in a map is easy. If a certain key does not exist in a map, the value initializes to zero and the key:value pair initializes to false.
+
+```go
+	numDolphins, dolphinsFound := animals["Dolphins"]
+	numCats, catsFound := animals["Cats"]
+
+	fmt.Println("Dolphins found:", dolphinsFound)
+
+	if dolphinsFound {
+		fmt.Printf("The zoo has %v Dolphins\n", numDolphins)
+	}
+
+	fmt.Println("Cats found:", catsFound)
+	if !catsFound {
+		fmt.Printf("The zoo has %v Cats\n", numCats)
+	}
+```
+
+There is a better way of checking the existence of a key in a map by using the following pattern:
+
+```go
+	if numLions, ok := animals["Lions"]; ok {
+		fmt.Printf("The zoo has %v Lions\n", numLions)
+	}
+```
+
+The statement `numLions, ok := animals["Lions"]` attempts to retrieve the value associated with the key "Lions" from the animals map. `numLions` will hold the the value associated with the key "Lions". `ok` is a boolean that will be `true` if the key "Lions" exists in the map and `false` otherwise.
+
+The conditional check `if ok {...}` will then follow to check if the key "Lions" was found in the map. If `ok` is `true` then the code in the `if ok {...}` block will be executed.
+
+
+### for range
+
+For range loops can be useful when working with arrays, slices and maps. for range loops use the following syntax:
+
+`
+	for index, item := range variable {
+		...
+	}
+`
+
+If you only want to access the index you can exclude the item as follows:
+
+`
+	for index:= range variable {
+		...
+	}
+`
+
+If you intend to only access the items without the index you can exclude the index as follows:
+
+`
+	for _, item := range variable {
+		...
+	}
+`
+
+Lets see the example code below:
+
+```go
+func main() {
+	bodyTypes := [3]string{"Sedan", "SUV", "Convertible"}
+
+	for i, bodyType := range bodyTypes {
+		fmt.Printf("Index: %v. Item: %v\n", i, bodyType)
+	}
+
+	// If you only want the item, but not the index
+	for _, bodyType := range bodyTypes {
+		fmt.Printf("Item: %v\n", bodyType)
+	}
+
+	// If you only want to access the index and not the items
+	for i := range bodyTypes {
+		fmt.Printf("Index: %v\n", i)
+	}
+} 
+```
+
+Iterating over a map using for range can be done as follows:
+
+```go
+func main() {
+	carInventory := map[string]int{
+		"Sedan": 25,
+		"SUV": 7,
+		"Convertible": 10,
+		"Hacthback": 8,
+	}
+
+	// Access both bodyType and count
+	for bodyType, count := range carInventory {
+		fmt.Printf("Key: %v -> Value: %v\n", bodyType, count)
+	}
+
+	// Access the values 
+	totalInventory := 0
+	for _, count := range carInventory {
+		totalInventory += count
+	}
+
+	fmt.Printf("We have %v cars in total\n", totalInventory)
+
+} 
+```
+
