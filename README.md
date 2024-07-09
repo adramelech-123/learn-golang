@@ -680,3 +680,490 @@ func main() {
 } 
 ```
 
+### Palindrome Exercise
+
+We are going to write a small program to check if a string is a palindrome
+
+```go
+func main() {
+	// Palindrome exercise
+
+	input := "Madam, I'm Adam"
+
+	// Remove non-letter characters and convert to lowercase
+	// Reminder: A rune is a data type that stores codes that represent Unicode characters
+	// Unicode is actually the collection of all possible ccharacters present in the whole world
+	// In Unicode, each of these characters is assigned a unique number called the Unicode code point
+	// This Unicode code point is what we store in a rune data type
+	normalized := ""
+	for _, r := range input {
+		// Check if a rune r represents a letter
+		// Note: When we are checking r, we are not checking the actual letter but we are checking the unicode code point representing the letter stored in the rune.
+		if unicode.IsLetter(r) {
+			normalized += string(unicode.ToLower(r))
+		}
+	}
+
+	var isPalindrome bool = true
+
+	length := len(normalized)
+
+	for i := 0; i < length/2; i++ {
+		if normalized[i] != normalized[length-1-i] {
+			isPalindrome = false
+			break
+		}
+	}
+
+	if isPalindrome {
+		fmt.Printf("%v is a palindrome\n", input)
+	} else {
+		fmt.Printf("%v is not a Palindrome\n", input)
+	}
+} 
+```
+
+## 6. Functions
+
+An example of a function that adds cars to the carInventory:
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+var carInventory = map[string]int{}
+
+func addToInventory(bodyType string, count int) {
+	carInventory[bodyType] += count
+	fmt.Println(bodyType, "added. New Count:", carInventory[bodyType])
+}
+
+func main() {
+	addToInventory("Sedan", 10)
+	addToInventory("Convertible", 25)
+	addToInventory("Sedan", 2)
+
+	fmt.Println(carInventory)
+} 
+
+```
+
+We can also get the count of a certain `bodyType` by returning types. In this case the `getCount` function returns an integer
+
+```go
+func getCount(bodyType string) int {
+	fmt.Printf("Looking up %v count\n", bodyType)
+	count := carInventory[bodyType]
+	return count //count will be returned as an integer
+}
+
+func main() {
+	addToInventory("Coupe", 3)
+	fmt.Println("Found:", getCount("Coupe"))
+} 
+
+```
+
+**Note:** Functions can also return multiple values
+
+
+### Variadic Functions
+
+A varidic function is function which we can pass as many arguments/parameters as we like.
+
+```go
+func sum(numbers ...int) int {
+	total := 0
+	for _, n := range numbers {
+		total += n
+	}
+
+	return total
+}
+
+func main() {
+	fmt.Println("Sum: ", sum(1,2,3,4,5))
+	fmt.Println("Sum: ", sum(100, 200, 300))
+} 
+```
+
+### Anonymous Functions
+
+```go
+package main
+
+import (
+	"fmt"
+	"math"
+
+)
+
+// A function can accept other functions as parameters
+func processNumber(num int, operation func(int) int) int {
+	return operation(num)
+}
+
+// We have two functions double and half which we can input as parameters in the processNumber function
+func double(num int) int {
+	return num *2
+}
+
+func half(num int) int {
+	return num /2
+}
+
+func main() {
+	first_result := processNumber(5, half)
+	fmt.Println(first_result)
+
+	//Anonymous function
+
+	result := processNumber(6, func(i int) int {
+		return int(math.Pow(float64(i), 3))
+	})
+
+	fmt.Println(result)
+} 
+```
+
+### Closures
+ 
+A function that returns a function. This style of function is called a closure.
+ 
+```go
+package main
+
+import (
+	"fmt"
+
+)
+
+func sequence() func() int {
+	i := 0
+
+	return func() int {
+		i++
+		return i
+	}
+}
+
+func main() {
+	nextInt := sequence()
+	fmt.Println(nextInt())
+	fmt.Println(nextInt())
+	fmt.Println(nextInt())
+}
+```
+
+We can run the fibonnacci sequnce using closures as follows:
+
+```go
+func fib() func() int {
+	a, b := 0, 1
+
+	return func() int {
+		a, b = b, a+b
+		return a
+	}
+
+}
+
+func main() {
+	f := fib()
+
+	fmt.Println(f(), f(), f(), f())
+}
+```
+
+## 7. Structs
+
+We use structs to define a new type. A struct is a prototype that groups variables of different types under a single name.
+
+You declare a struct by using the `type` and `struct` keywords, kind of like how we do it with typescript:
+
+```go
+type AuditInfo struct {
+	CreatedAt time.Time
+	LastModified time.Time
+}
+
+type BankAccount struct {
+	AccountNumber string
+	Balance       float64  
+	AuditInfo     // Embedding Audit info struct into BankAccount struct
+}
+
+// METHODS TO PERFORM ON STRUCTS
+
+
+// Value Reciever
+// Use when the method does not modify the original struct, If the struct is small an if you want to maintain immutability of the struct
+func (bal BankAccount) DisplayBalance() {
+	fmt.Printf("Account Number: %s, Balance: $%2f\n", bal.AccountNumber, bal.Balance)
+}
+
+//  Pointer Reciever
+// Use if, the method modifies the original struct and if the struct is large
+func (bal *BankAccount) Deposit(amt float64) {
+	bal.Balance += amt
+}
+
+// Naive approach with no error handling (Amateur)
+
+// func (bal *BankAccount) Withdraw(amt float64) {
+// 	if bal.Balance > amt {
+// 		bal.Balance -= amt
+// 		fmt.Printf("You have withdrawn $%2f, your current balance is %2f\n", amt, bal.Balance)
+// 	} else {
+// 		fmt.Printf("Insufficient funds! Your balance is $%2f\n", bal.Balance)
+// 	}
+// }
+
+
+// A better approach using error-handling
+func (bal *BankAccount) Withdraw(amt float64) error {
+	
+	if bal.Balance < amt {
+		fmt.Printf("Insufficient funds! Your balance is $%2f\n", bal.Balance)
+		return errors.New("You have insufficient funds!")
+	}
+
+	bal.Balance -= amt
+	fmt.Printf("You have withdrawn $%2f, your current balance is %2f\n", amt, bal.Balance)
+
+	return nil
+	
+}
+
+
+
+
+func main() {
+	
+	account := BankAccount{
+		AccountNumber: "123456789",
+		Balance: 1000.00,
+		AuditInfo: AuditInfo{
+			CreatedAt: time.Now(), 
+			LastModified: time.Now(),
+		},
+	}
+
+
+	account.DisplayBalance()
+	account.Deposit(1000)
+	account.DisplayBalance()
+	account.Withdraw(1000)
+}
+```
+
+Here we will build out a Banks with Customers who own bank accounts using structs and applying functions on the different structs.
+
+```go
+
+package main
+
+import (
+	"errors"
+	"fmt"
+	"time"
+)
+
+type AuditInfo struct {
+	CreatedAt time.Time
+	LastModified time.Time
+}
+
+type BankAccount struct {
+	AccountNumber string
+	Balance       float64  
+	AuditInfo     
+}
+
+// Display Bank Balance
+func (bal BankAccount) DisplayBalance() {
+	fmt.Printf("Account Number: %s, Balance: $%2f\n", bal.AccountNumber, bal.Balance)
+}
+
+// Deposit into bank account
+func (bal *BankAccount) Deposit(amt float64) {
+	bal.Balance += amt
+}
+
+// Withdraw from bank account
+func (bal *BankAccount) Withdraw(amt float64) error {
+	
+	if bal.Balance < amt {
+		fmt.Printf("You have Insufficient funds! Your balance is $%2f\n", bal.Balance)
+		return errors.New("insufficient funds")
+	}
+
+	bal.Balance -= amt
+	fmt.Printf("You have withdrawn $%2f, your current balance is %2f\n", amt, bal.Balance)
+
+	return nil
+}
+
+// Customer Type
+
+type Customer struct {
+	Name      string
+	accounts  []BankAccount
+	AuditInfo
+}
+
+// Add New account to customer
+func (c *Customer) AddAccount(account BankAccount) {
+	c.accounts = append(c.accounts, account)
+}
+
+// Display all acccounts of a customer
+func (c Customer) DisplayAccounts() {
+	fmt.Printf("Customer: %s\n", c.Name)
+	for _, account := range c.accounts {
+		account.DisplayBalance()
+	}
+}
+
+// Bank Type
+type Bank struct {
+	Name string
+	Customers []Customer
+} 
+
+// Add Customer to Bank
+func (b *Bank) AddCustomer (customer Customer) {
+	b.Customers = append(b.Customers, customer)
+}
+
+// Display all customers in the bank
+func (b Bank) DisplayCustomers() {
+	fmt.Printf("Bank: %s\n", b.Name)
+	for _, customer := range b.Customers {
+		customer.DisplayAccounts()
+	}
+}
+
+func main() {
+	bank1 := Bank{
+		Name: "Hidden-Leaf Bank",
+	}
+
+	bank2 := Bank {
+		Name: " Broke People's Bank",
+	}
+
+	customer1 := Customer {
+		Name: "Sasuke Uchiha",
+		AuditInfo: AuditInfo{CreatedAt: time.Now(), LastModified: time.Now()},
+	}
+
+	customer2 := Customer {
+		Name: "Naruto Uzumaki",
+		AuditInfo: AuditInfo{CreatedAt: time.Now(), LastModified: time.Now()},
+	}
+
+	customer3 := Customer {
+		Name: "Johnny Bravo",
+		AuditInfo: AuditInfo{CreatedAt: time.Now(), LastModified: time.Now()},
+	}
+
+	account1 := BankAccount {
+		AccountNumber: "178001618844",
+		Balance: 3467,
+		AuditInfo: AuditInfo{CreatedAt: time.Now(), LastModified: time.Now()},
+	}
+
+	account2 := BankAccount {
+		AccountNumber: "1780023418756",
+		Balance: 5800.93,
+		AuditInfo: AuditInfo{CreatedAt: time.Now(), LastModified: time.Now()},
+	}
+
+	account3 := BankAccount {
+		AccountNumber: "1571059317788",
+		Balance: 25.33,
+		AuditInfo: AuditInfo{CreatedAt: time.Now(), LastModified: time.Now()},
+	}
+
+
+	// Adding accounts to customers
+	customer1.AddAccount(account1)
+	customer2.AddAccount(account2)
+	customer3.AddAccount(account3)
+
+	// Adding Customers to bank
+	bank1.AddCustomer(customer1)
+	bank1.AddCustomer(customer2)
+	bank2.AddCustomer(customer3)
+
+	bank1.DisplayCustomers()
+	bank2.DisplayCustomers()
+
+}
+```
+
+## 8. Constructor Functions
+
+In the example code below we will create constructor functions as:
+
+```go
+// Constructor Functions
+
+func NewBank(name string) *Bank {
+	return &Bank{Name: name}
+}
+
+func NewCustomer(name string) *Customer {
+	return &Customer{
+		Name: name,
+		AuditInfo: AuditInfo{CreatedAt: time.Now(), LastModified: time.Now()},
+	}
+}
+
+func NewBankAccount(acc string) *BankAccount {
+	return &BankAccount{
+		AccountNumber: acc,
+		AuditInfo: AuditInfo{CreatedAt: time.Now(), LastModified: time.Now()},
+	}
+}
+```
+
+Now we can refactor our code in the main func as follows:
+
+```go
+func main() {
+	bank1 := NewBank("Hidden Leaf Bank")
+	bank2 := NewBank("Broke People's Bank")
+
+	customer1 := NewCustomer("Sasuke Uchiha")
+	customer2 := NewCustomer("Naruto Uzumaki")
+	customer3 := NewCustomer("Johhny Bravo")
+
+	account1 := NewBankAccount("178001618844")
+	account1.Deposit(3600)
+
+	account2 := NewBankAccount("1780023418756")
+	account2.Deposit(6850)
+
+	account3 := NewBankAccount("1571059317788")
+	account3.Deposit(13.5)
+
+
+	// Adding accounts to customers
+	customer1.AddAccount(*account1)
+	customer2.AddAccount(*account2)
+	customer3.AddAccount(*account3)
+
+	// Adding Customers to bank
+	bank1.AddCustomer(*customer1)
+	bank1.AddCustomer(*customer2)
+	bank2.AddCustomer(*customer3)
+
+	bank1.DisplayCustomers()
+	bank2.DisplayCustomers()
+}
+```
