@@ -772,7 +772,7 @@ func main() {
 
 ### Variadic Functions
 
-A varidic function is function which we can pass as many arguments/parameters as we like.
+A variadic function is function which we can pass as many arguments/parameters as we like.
 
 ```go
 func sum(numbers ...int) int {
@@ -937,8 +937,6 @@ func (bal *BankAccount) Withdraw(amt float64) error {
 	return nil
 	
 }
-
-
 
 
 func main() {
@@ -1167,3 +1165,162 @@ func main() {
 	bank2.DisplayCustomers()
 }
 ```
+
+## 9. Type Declarations
+
+Structs are a great way to define complex types/concepts that don't come built-in with Go. What if we want to extend built-in types?
+
+For example, `BankAccount` is a `string` but we want the string to have a specific length or it should start with a certain number. We can do this through type declarations as follows:
+
+```go
+type AccountNumber string
+
+// IsValid method: Check if Account Number is of a certain length
+func (a AccountNumber) IsValid() bool {
+	return len(string(a)) == 12
+}
+
+// Now the NewBankAccount method becomes
+
+func NewBankAccount(acc AccountNumber) *BankAccount {
+	// Creates the Account if the AccountNumber is Valid else we get a runtime error
+	if acc.IsValid() {
+		return &BankAccount{
+			AccountNumber: acc,
+			AuditInfo: AuditInfo{CreatedAt: time.Now(), LastModified: time.Now()},
+		}
+	}
+	
+	return nil
+}
+```
+
+## 10. Type Aliases
+
+We can create a type as an alias of another type e.g. 
+
+```go
+// Balance and float64 are now interchangeable. Note the "=" sign when declaring a type alias
+type Balance = float64
+
+// Now the BankAccount struct can be as follows
+type BankAccount struct {
+	AccountNumber  AccountNumber
+	Balance        Balance 
+	AuditInfo     
+}
+```
+
+## 11. Interfaces
+
+In GO, an interface is a type that specifies a set of method signatures or behaviours without implementing them. Any type that implements all those methods is said to implicity satisfy the interface.
+
+
+
+## 12. Type Assertion
+
+Type assertion allows us to assert if an empty interface `interface{}` is of a specific type.
+
+```go
+func main() {
+	var i interface{} = "Hello"
+
+	// Asserting that i is a string and we assign it to variable s. 
+	// Note: This approach is not as effective especially in cases of a failed operation
+	s := i.(string)
+	fmt.Println(s)
+
+	// ok is a boolean that specifies if the operation has succeeded or not e.g. is s really a string or not (true or false). This approach is better in terms of error/failure handling
+	s, ok := i.(string) 
+	fmt.Println(s, ok)
+
+	f, ok := i.(float64)
+	fmt.Println(f, ok)
+
+	// Note: This will cause a Panic, that's why its recommended to use a boolean to confirm operation success or failure
+	// f := i.(float64)
+	// fmt.Println(f)
+}
+```
+
+## 13. Type Switch
+
+We can use the switch case statement to define implement certain operations depending on the type assertion made. For example:
+
+```go
+
+// The function do checks if a type assertion is an integer or string otherwise it will provide a default response.
+func do(i interface{}) {
+	switch v := i.(type) {
+	case int:
+		fmt.Printf("Twice %v is %v\n", v, v*2)
+	case string:
+		fmt.Printf("%q is %v characters long\n", v, len(v))	
+	default:
+		fmt.Printf("I dont know what a %T is!\n", v)	
+	}
+}
+
+func main() {
+	do(21)
+	do("hello")
+	do(3.00)
+}
+```
+
+## 14. Generics
+
+Generics allow us to define functions and data structures that work with multiple types without the need for runtime type assertions or type casting.
+
+Type parameters and type constraints are the building blocks of generics in Go. Type parameters are placeholders for the actual types that will be used when the generic function or data structure is initiated. Type constraints restrict the types that can be used as type arguments.
+
+```go
+// Note: any is an alias for the empty interface `interface{}`
+// PrintSlice accepts a slice s of any type T and performs the operation on the slice
+//  [T any] helps us define that PrintSlice is a generic
+
+func PrintSlice[T any] (s []T) {
+	for _, v := range s {
+		fmt.Println(v)
+	}
+}
+
+
+func main() {
+	// String slice
+	bodyTypes := []string{"Sedan", "SUV", "Convertible", "Hatchback", "Coupe"}
+
+	//Int slice
+	maxSpeed := []int{220, 180, 300, 180, 220}
+
+	PrintSlice[string](bodyTypes) 
+	PrintSlice[int](maxSpeed) 
+	
+}
+```
+
+Generics can also be defined as Generic Types. For example we can define a struct called Pair which accepts generic types of K and V for a Key and Value respectively. We then create a fucntion that accepts a slice p of type Pair which will print a string describing the key and the value.
+
+```go
+type Pair[K, V any] struct {
+	Key     K
+	Value   V
+}
+
+func (p Pair[K, V]) Describe() string {
+	return fmt.Sprintf("Key: %v, Value: %v", p.Key, p.Value)
+}
+
+
+func main() {
+	intStringPair := Pair[int, string]{Key: 1, Value: "One"}
+	fmt.Println(intStringPair.Describe())
+	//Output: Key: 1, Value: One
+
+	stringFloatPair := Pair[string, float64]{Key: "Pi", Value: 3.14159}
+	fmt.Println(stringFloatPair.Describe())
+	// Output: Key: Pi, Value: 3.14159
+}
+
+```
+
